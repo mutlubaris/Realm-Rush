@@ -1,21 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] float secondsBetweenSpawns = 2f;
+    [Range(0.1f, 120f)]
+    [SerializeField] float secondsBetweenSpawns = 4f;
     [SerializeField] EnemyMovement enemyPrefab;
+    [SerializeField] Transform enemyParentTransform;
+    [SerializeField] Text spawnText;
+    [SerializeField] AudioClip spawnedEnemySFX;
+    int spawns = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        Instantiate(enemyPrefab, new Vector3(-10, 0, 0), Quaternion.identity);
+        StartCoroutine(RepeatedlySpawnEnemies());
+        spawnText.text = "Spawned : " + spawns.ToString();
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator RepeatedlySpawnEnemies()
     {
-        
+        while (true)
+        {
+            GetComponent<AudioSource>().PlayOneShot(spawnedEnemySFX);
+            var newEnemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+            spawns += 1;
+            spawnText.text = "Spawned : " + spawns.ToString();
+            newEnemy.transform.parent = enemyParentTransform;
+            yield return new WaitForSeconds(secondsBetweenSpawns);
+        }
     }
 }
